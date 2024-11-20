@@ -7,12 +7,11 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
-    'plugin:prettier/recommended',
     'plugin:jsx-a11y/recommended',
-    'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'next',
     'next/core-web-vitals',
+    'plugin:prettier/recommended',
   ],
   overrides: [
     {
@@ -24,4 +23,4 @@ module.exports = {
       },
     },
   ],
-}
+};
