@@ -7,16 +7,20 @@ import { SiKakao } from 'react-icons/si';
 import { MdOutlineAutoAwesome } from 'react-icons/md';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { useState } from 'react';
 
 import Typography from '@/components/ui/typography';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
+import { Provider } from '@supabase/supabase-js';
+import { createClient } from '@/supabase/supabaseClient';
+import { registerWithEmail } from '@/actions/register-with-email';
 
 const AuthPage = () => {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const supabase = createClient();
 
   const formSchema = z.object({
     email: z.string().email().min(5, { message: 'Email must be 5 characters' }),
@@ -28,7 +32,21 @@ const AuthPage = () => {
     },
   });
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    setIsAuthenticating(true);
+    const response = await registerWithEmail(values);
+    const { data, error } = JSON.parse(response);
+    setIsAuthenticating(false);
+  }
+
+  async function socialAuth(provider: Provider) {
+    setIsAuthenticating(true);
+    await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${location.origin}/auth/callback`,
+      },
+    });
+    setIsAuthenticating(false);
   }
 
   return (
@@ -49,6 +67,7 @@ const AuthPage = () => {
             disabled={isAuthenticating}
             variant='outline'
             className='flex space-x-3 border-2 py-6'
+            onClick={() => socialAuth('google')}
           >
             <FcGoogle size={30} />
             <Typography text='Sign in with Google' variant='p' className='text-xl' />
@@ -57,6 +76,7 @@ const AuthPage = () => {
             disabled={isAuthenticating}
             variant='outline'
             className='flex space-x-3 border-2 py-6'
+            onClick={() => socialAuth('github')}
           >
             <RxGithubLogo size={30} />
             <Typography text='Sign in with Github' variant='p' className='text-xl' />
@@ -65,6 +85,7 @@ const AuthPage = () => {
             disabled={isAuthenticating}
             variant='outline'
             className='flex space-x-3 border-2 py-6'
+            onClick={() => socialAuth('kakao')}
           >
             <SiKakao size={30} />
             <Typography text='Sign in with Kakao' variant='p' className='text-xl' />
